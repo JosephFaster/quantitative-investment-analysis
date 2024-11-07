@@ -3,18 +3,28 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy.stats as st
 import importlib
+import os
+from dotenv import load_dotenv
 
+# Cargar el archivo `path.env` para que esté disponible en toda la función
+load_dotenv('path.env')
 
-def load_timeseries(ric):
-    directory = 'C:\\Users\\candy\\Downloads\\Reto_actinver\\Reto actinver 2.0\\Data\\'
-    path = directory + ric + '.csv' 
+def load_timeseries(ric, directory=None):
+    # Usa la variable de entorno 'DATA_DIRECTORY' si no se proporciona un directorio
+    if directory is None:
+        directory = os.getenv('DATA_DIRECTORY')
+        if directory is None:
+            raise ValueError("La variable de entorno 'DATA_DIRECTORY' no está configurada en el archivo .env")
+
+    path = os.path.join(directory, f"{ric}.csv")
     raw_data = pd.read_csv(path)
+    
     t = pd.DataFrame()
     t['date'] = pd.to_datetime(raw_data['Date'], dayfirst=True)
     t['close'] = raw_data['Close']
     t = t.sort_values(by='date', ascending=True)
     t['close_previous'] = t['close'].shift(1)
-    t['return'] = t['close']/t['close_previous'] - 1
+    t['return'] = t['close'] / t['close_previous'] - 1
     t = t.dropna()
     t = t.reset_index(drop=True)
     return t
@@ -83,6 +93,7 @@ class distribution:
         self.jb_stat = None
         self.p_value = None
         self.is_normal = None
+        self.directory= None
         
     def load_timeseries(self):
         self.timeseries = load_timeseries(self.ric)
