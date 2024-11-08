@@ -93,7 +93,6 @@ class distribution:
         self.jb_stat = None
         self.p_value = None
         self.is_normal = None
-        self.directory= None
         
     def load_timeseries(self):
         self.timeseries = load_timeseries(self.ric)
